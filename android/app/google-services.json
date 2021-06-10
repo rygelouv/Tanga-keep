@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "104112212110",
+    "firebase_url": "https://flutterkeep-139e8.firebaseio.com",
+    "project_id": "flutterkeep-139e8",
+    "storage_bucket": "flutterkeep-139e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104112212110:android:e415d2aac252ee9eeda1df",
+        "android_client_info": {
+          "package_name": "com.rygelouv.keep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "104112212110-pru3t401qsmb0e61ruhu33fib5sevilf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN-lzuPq7x-G_xKa4oyoaRg22joR2LaxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "104112212110-pru3t401qsmb0e61ruhu33fib5sevilf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "104112212110-lv2rbsec43qbjpcl25t34i4etqgpkhi2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rygelouv.keep"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
