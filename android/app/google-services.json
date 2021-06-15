@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "104112212110-nunfjtetdbrkub9hhmpoeq7ila4lja2o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rygelouv.keep",
+            "certificate_hash": "460ef4f51fdea0d78256274d74208d5c08c6de3a"
+          }
+        },
+        {
           "client_id": "104112212110-pru3t401qsmb0e61ruhu33fib5sevilf.apps.googleusercontent.com",
           "client_type": 3
         }
