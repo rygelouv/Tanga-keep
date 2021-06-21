@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/screens.dart';
 import 'package:keep/service/notes_service.dart';
 import 'package:keep/widget/color_picker.dart';
 import 'package:keep/widget/note_actions.dart';
@@ -245,6 +246,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
         ..modifiedAt = DateTime.now()
         ..saveToFireStore(uid);
       Navigator.pop(context);
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
     }
     return Future.value(true);
   }
