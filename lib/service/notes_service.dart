@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection_ext/iterables.dart';
 import 'package:flutter/material.dart';
 import 'package:keep/model/note.dart';
+import 'package:keep/screen/home_screen.dart';
 
 import '../styles.dart';
 
@@ -97,6 +98,11 @@ mixin CommandHandler<T extends StatefulWidget> on State<T> {
         ),
       ));
     }
+    /* bug : The Navigator.pop don't refresh the home screen
+     fix: We add this line so that after every action, the user will be redirect to home screen
+     which will refresh the screen
+     */
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 }
 
