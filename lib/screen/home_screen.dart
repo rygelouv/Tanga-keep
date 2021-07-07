@@ -2,10 +2,14 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:keep/model/book.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
+import 'package:keep/widget/books_grid.dart';
+import 'package:keep/widget/books_list.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
 import 'package:keep/widget/notes_list.dart';
@@ -44,15 +48,15 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
             ),
             Consumer<NoteFilter>(
               builder: (context, filter, child) => StreamProvider.value(
-                value: _createNoteStream(context, filter),
+                value: _createBookStream(context, filter),
                 // applying the filter to Firestore query
                 child: child,
               ),
             ),
           ],
-          child: Consumer2<NoteFilter, List<Note>>(
-            builder: (context, filter, notes, child) {
-              final hasNotes = notes?.isNotEmpty == true;
+          child: Consumer2<NoteFilter, List<Book>>(
+            builder: (context, filter, books, child) {
+              final hasNotes = books?.isNotEmpty == true;
               final canCreate = filter.noteState.canCreate;
               return Scaffold(
                 key: _scaffoldKey,
@@ -66,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
                           const SliverToBoxAdapter(
                             child: SizedBox(height: 24),
                           ),
-                        ..._buildNotesView(context, filter, notes),
+                        ..._buildBooksView(context, books),
                         if (hasNotes)
                           SliverToBoxAdapter(
                             child: SizedBox(
@@ -225,25 +229,11 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   ///
   /// Notes are divided to `Pinned` and `Others` when there's no filter,
   /// and a blank view will be rendered, if no note found.
-  List<Widget> _buildNotesView(
-      BuildContext context, NoteFilter filter, List<Note> notes) {
-    if (notes?.isNotEmpty != true) {
-      return [_buildBlankView(filter.noteState)];
-    }
+  List<Widget> _buildBooksView(
+      BuildContext context, List<Book> books) {
 
-    final asGrid = filter.noteState == NoteState.deleted || _gridView;
-    final factory = asGrid ? NotesGrid.create : NotesList.create;
-    final showPinned = filter.noteState == NoteState.unspecified;
-
-    if (!showPinned) {
-      return [
-        factory(notes: notes, onTap: _onNoteTap),
-      ];
-    }
-
-    final partition = _partitionNotes(notes);
-    final hasPinned = partition.item1.isNotEmpty;
-    final hasUnpinned = partition.item2.isNotEmpty;
+    //final asGrid = filter.noteState == NoteState.deleted || _gridView;
+    final factory = BooksGrid.create;
 
     final _buildLabel = (String label, [double top = 26]) => SliverToBoxAdapter(
           child: Container(
@@ -260,10 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         );
 
     return [
-      if (hasPinned) _buildLabel('PINNED', 0),
-      if (hasPinned) factory(notes: partition.item1, onTap: _onNoteTap),
-      if (hasPinned && hasUnpinned) _buildLabel('OTHERS'),
-      factory(notes: partition.item2, onTap: _onNoteTap),
+      factory(books: books, onTap: _onBookTap),
     ];
   }
 
@@ -294,45 +281,26 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       );
 
   /// Callback on a single note clicked
-  void _onNoteTap(Note note) async {
-    final command =
+  void _onBookTap(Book book) async {
+    /*final command =
         await Navigator.pushNamed(context, '/note', arguments: {'note': note});
-    processNoteCommand(_scaffoldKey.currentState, command);
+    processNoteCommand(_scaffoldKey.currentState, command);*/
   }
 
   /// Create notes query
-  Stream<List<Note>> _createNoteStream(
+  Stream<List<Book>> _createBookStream(
       BuildContext context, NoteFilter filter) {
     final user = Provider.of<CurrentUser>(context)?.data;
     final sinceSignUp = DateTime.now().millisecondsSinceEpoch -
         (user?.metadata?.creationTime?.millisecondsSinceEpoch ?? 0);
     final useIndexes = sinceSignUp >=
         _10_min_millis; // since creating indexes takes time, avoid using composite index until later
-    final collection = notesCollection(user?.uid);
-    final query = filter.noteState == NoteState.unspecified
-        ? collection
-            .where('state',
-                isLessThan: NoteState.archived
-                    .index) // show both normal/pinned notes when no filter specified
-            .orderBy('state', descending: true) // pinned notes come first
-        : collection.where('state', isEqualTo: filter.noteState.index);
+    final collection = booksCollection(user?.uid);
 
-    return (useIndexes ? query.orderBy('createdAt', descending: true) : query)
+    return collection
         .snapshots()
-        .handleError((e) => debugPrint('query notes failed: $e'))
-        .map((snapshot) => Note.fromQuery(snapshot));
-  }
-
-  /// Partition the note list by the pinned state
-  Tuple2<List<Note>, List<Note>> _partitionNotes(List<Note> notes) {
-    if (notes?.isNotEmpty != true) {
-      return Tuple2([], []);
-    }
-
-    final indexUnpinned = notes?.indexWhere((n) => !n.pinned);
-    return indexUnpinned > -1
-        ? Tuple2(notes.sublist(0, indexUnpinned), notes.sublist(indexUnpinned))
-        : Tuple2(notes, []);
+        .handleError((e) => debugPrint('query books failed: $e'))
+        .map((snapshot) => Book.fromQuery(snapshot));
   }
 }
 
