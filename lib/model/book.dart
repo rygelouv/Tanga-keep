@@ -1,7 +1,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
-class Book {
+class Book extends ChangeNotifier {
   final String id;
   String title;
   String cover;

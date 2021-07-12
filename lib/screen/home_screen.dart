@@ -41,81 +41,48 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
           systemNavigationBarColor: Colors.white,
           systemNavigationBarIconBrightness: Brightness.dark,
         ),
-        child: MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => NoteFilter(), // watching the note filter
-            ),
-            Consumer<NoteFilter>(
-              builder: (context, filter, child) => StreamProvider.value(
-                value: _createBookStream(context, filter),
-                // applying the filter to Firestore query
-                child: child,
+        child: StreamProvider.value(
+          value: _createBookStream(context),
+          child: Scaffold(
+            body: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.tightFor(width: 720),
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    _appBar(context), // a floating appbar
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 24), // top spacing
+                    ),
+                    _buildBooksView(context),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(
+                          height:
+                              80.0), // bottom spacing make sure the content can scroll above the bottom bar
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-          child: Consumer2<NoteFilter, List<Book>>(
-            builder: (context, filter, books, child) {
-              final hasNotes = books?.isNotEmpty == true;
-              final canCreate = filter.noteState.canCreate;
-              return Scaffold(
-                key: _scaffoldKey,
-                body: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints.tightFor(width: 720),
-                    child: CustomScrollView(
-                      slivers: <Widget>[
-                        _appBar(context, filter, child),
-                        if (hasNotes)
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 24),
-                          ),
-                        ..._buildBooksView(context, books),
-                        if (hasNotes)
-                          SliverToBoxAdapter(
-                            child: SizedBox(
-                                height:
-                                    (canCreate ? kBottomBarSize : 10.0) + 10.0),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                drawer: AppDrawer(),
-                floatingActionButton: canCreate ? _fab(context) : null,
-                bottomNavigationBar: canCreate ? _bottomActions() : null,
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerFloat,
-                extendBody: true,
-              );
-            },
+            floatingActionButton: _fab(context),
+            bottomNavigationBar: _bottomActions(),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            extendBody: true,
           ),
         ),
       );
 
-  Widget _appBar(BuildContext context, NoteFilter filter, Widget bottom) =>
-      filter.noteState < NoteState.archived
-          ? SliverAppBar(
-              floating: true,
-              snap: true,
-              title: _topActions(context),
-              automaticallyImplyLeading: false,
-              centerTitle: true,
-              titleSpacing: 0,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-            )
-          : SliverAppBar(
-              floating: true,
-              snap: true,
-              title: Text(filter.noteState.filterName),
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                tooltip: 'Menu',
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              ),
-              automaticallyImplyLeading: false,
-            );
+  Widget _appBar(BuildContext context) => SliverAppBar(
+        floating: true,
+        snap: true,
+        title: Text(""),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          tooltip: 'Menu',
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+        automaticallyImplyLeading: false,
+      );
 
   Widget _topActions(BuildContext context) => Container(
         // width: double.infinity,
@@ -215,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     );
   }
 
-
   Widget _buildAvatar(BuildContext context) {
     final url = Provider.of<CurrentUser>(context)?.data?.photoUrl;
     return CircleAvatar(
@@ -229,54 +195,26 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   ///
   /// Notes are divided to `Pinned` and `Others` when there's no filter,
   /// and a blank view will be rendered, if no note found.
-  List<Widget> _buildBooksView(
-      BuildContext context, List<Book> books) {
+  Widget _buildBooksView(BuildContext context) => Consumer<List<Book>>(
+        builder: (context, books, _) {
+          if (books?.isNotEmpty != true) {
+            return _buildBlankView();
+          }
 
-    //final asGrid = filter.noteState == NoteState.deleted || _gridView;
-    final factory = BooksGrid.create;
+          final widget = BooksGrid.create;
 
-    final _buildLabel = (String label, [double top = 26]) => SliverToBoxAdapter(
-          child: Container(
-            padding:
-                EdgeInsetsDirectional.only(start: 26, bottom: 25, top: top),
-            child: Text(
-              label,
-              style: const TextStyle(
-                  color: kHintTextColorLight,
-                  fontWeight: FontWeights.medium,
-                  fontSize: 12),
-            ),
-          ),
-        );
+          return widget(books: books, onTap: (_) {});
+        },
+      );
 
-    return [
-      factory(books: books, onTap: _onBookTap),
-    ];
-  }
-
-  Widget _buildBlankView(NoteState filteredState) => SliverFillRemaining(
+  Widget _buildBlankView() => const SliverFillRemaining(
         hasScrollBody: false,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const Expanded(flex: 1, child: SizedBox()),
-            Icon(
-              AppIcons.thumbtack,
-              size: 120,
-              color: kAccentColorLight.shade300,
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                filteredState.emptyResultMessage,
-                style: TextStyle(
-                  color: kHintTextColorLight,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
+        child: Text(
+          'Notes you add appear here',
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 14,
+          ),
         ),
       );
 
@@ -288,8 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   }
 
   /// Create notes query
-  Stream<List<Book>> _createBookStream(
-      BuildContext context, NoteFilter filter) {
+  Stream<List<Book>> _createBookStream(BuildContext context) {
     final user = Provider.of<CurrentUser>(context)?.data;
     final sinceSignUp = DateTime.now().millisecondsSinceEpoch -
         (user?.metadata?.creationTime?.millisecondsSinceEpoch ?? 0);
