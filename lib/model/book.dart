@@ -1,7 +1,11 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
-class Book {
+/// We make Book extends ChangeNotfier so that
+/// every changes on this model will be notified
+
+class Book extends ChangeNotifier {
   final String id;
   String title;
   String cover;
