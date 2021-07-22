@@ -1,0 +1,4 @@
+enum CameraSource {
+  book,
+  note
+}

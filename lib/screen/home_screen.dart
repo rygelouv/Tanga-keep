@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keep/model/book.dart';
+import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
@@ -73,16 +74,15 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       );
 
   Widget _appBar(BuildContext context) => SliverAppBar(
-        floating: true,
-        snap: true,
-        title: Text(""),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          tooltip: 'Menu',
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        automaticallyImplyLeading: false,
-      );
+    floating: true,
+    snap: true,
+    title: _topActions(context),
+    automaticallyImplyLeading: false,
+    centerTitle: true,
+    titleSpacing: 0,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+  );
 
   Widget _topActions(BuildContext context) => Container(
         // width: double.infinity,
@@ -175,10 +175,14 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     // Get a specific camera from the list of available cameras.
     final firstCamera = cameras.first;
 
+    //Define the source of the camera like the screen
+    // from where the camera is called (note or book)
+    final cameraSource = CameraSource.book;
+
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera)),
+          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: cameraSource)),
     );
   }
 
