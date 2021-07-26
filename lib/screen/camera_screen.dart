@@ -5,6 +5,8 @@ import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:keep/model/book.dart';
+import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/note.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -34,10 +36,12 @@ Future<void> main() async {
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
+  final CameraSource cameraSource;
 
   const TakePictureScreen({
     Key key,
     @required this.camera,
+    @required this.cameraSource,
   }) : super(key: key);
 
   @override
@@ -116,26 +120,34 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             // Attempt to take a picture and log where it's been saved.
             await _controller.takePicture(path);
 
-            File croppedFile = await ImageCropper.cropImage(
-                sourcePath: path,
-                aspectRatioPresets: [
-                  CropAspectRatioPreset.square,
-                  CropAspectRatioPreset.ratio3x2,
-                  CropAspectRatioPreset.original,
-                  CropAspectRatioPreset.ratio4x3,
-                  CropAspectRatioPreset.ratio16x9
-                ],
-                androidUiSettings: AndroidUiSettings(
-                    toolbarTitle: 'Crop your note',
-                    toolbarColor: Colors.black,
-                    toolbarWidgetColor: Colors.white,
-                    initAspectRatio: CropAspectRatioPreset.original,
-                    lockAspectRatio: false),
-                iosUiSettings: IOSUiSettings(
-                  minimumAspectRatio: 1.0,
-                ));
+            switch(widget.cameraSource) {
+              case CameraSource.book:
+                saveBookData(path);
+                debugPrint("#### Book cover ######");
+                break;
+              case CameraSource.note:
+                File croppedFile = await ImageCropper.cropImage(
+                    sourcePath: path,
+                    aspectRatioPresets: [
+                      CropAspectRatioPreset.square,
+                      CropAspectRatioPreset.ratio3x2,
+                      CropAspectRatioPreset.original,
+                      CropAspectRatioPreset.ratio4x3,
+                      CropAspectRatioPreset.ratio16x9
+                    ],
+                    androidUiSettings: AndroidUiSettings(
+                        toolbarTitle: 'Crop your note',
+                        toolbarColor: Colors.black,
+                        toolbarWidgetColor: Colors.white,
+                        initAspectRatio: CropAspectRatioPreset.original,
+                        lockAspectRatio: false),
+                    iosUiSettings: IOSUiSettings(
+                      minimumAspectRatio: 1.0,
+                    ));
+                getTextFromImage(croppedFile.path);
 
-            getTextFromImage(croppedFile.path);
+                break;
+            }
           } catch (e) {
             // If an error occurs, log the error to the console.
             print(e);
@@ -172,6 +184,12 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         builder: (context) => DisplayPictureScreen(imagePath: path),
       ),
     );
+  }
+
+  void saveBookData(String path) {
+    Book book = Book(cover: path);
+    Navigator.of(context)
+        .pushReplacementNamed('/book', arguments: {'book': book});
   }
 }
 
