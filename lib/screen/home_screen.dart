@@ -45,10 +45,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         child: StreamProvider.value(
           value: _createBookStream(context),
           child: Scaffold(
-            body: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints.tightFor(width: 720),
-                child: CustomScrollView(
+            body: CustomScrollView(
                   slivers: <Widget>[
                     _appBar(context), // a floating appbar
                     const SliverToBoxAdapter(
@@ -62,8 +59,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
                     ),
                   ],
                 ),
-              ),
-            ),
             floatingActionButton: _fab(context),
             bottomNavigationBar: _bottomActions(),
             floatingActionButtonLocation:
@@ -154,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       //child: const Icon(Icons.add),
       heroTag: null,
       icon: Icon(Icons.add),
-      label: Text("New Note"),
+      label: Text("New Book"),
       onPressed: openCamera
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
@@ -232,10 +227,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   /// Create notes query
   Stream<List<Book>> _createBookStream(BuildContext context) {
     final user = Provider.of<CurrentUser>(context)?.data;
-    final sinceSignUp = DateTime.now().millisecondsSinceEpoch -
-        (user?.metadata?.creationTime?.millisecondsSinceEpoch ?? 0);
-    final useIndexes = sinceSignUp >=
-        _10_min_millis; // since creating indexes takes time, avoid using composite index until later
     final collection = booksCollection(user?.uid);
 
     return collection
@@ -244,5 +235,3 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         .map((snapshot) => Book.fromQuery(snapshot));
   }
 }
-
-const _10_min_millis = 600000;
