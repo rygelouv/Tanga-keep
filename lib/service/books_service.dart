@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as Path;
 
 /*
   For now this file will only contain
@@ -9,6 +11,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
   we get every book's notes
 */
 
+/// Returns reference to the storage
+/// We will need Firebase Storage to store the book cover
+StorageReference storageReference(cover) => FirebaseStorage.instance
+    .ref()
+    .child("books/${Path.basename(cover)}");
 
 /// Returns reference to the books collection of the user [uid].
 CollectionReference booksCollection(String uid) => Firestore.instance.collection('books-$uid');

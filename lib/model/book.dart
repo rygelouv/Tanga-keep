@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:keep/service/books_service.dart';
 
 /// We make Book extends ChangeNotfier so that
 /// every changes on this model will be notified
@@ -22,6 +23,32 @@ class Book extends ChangeNotifier {
   this.modifiedAt = modifiedAt ?? DateTime.now();
 
   static List<Book> fromQuery(QuerySnapshot snapshot) => snapshot != null ? toBooks(snapshot) : [];
+
+  /// Serializes this book into a JSON object.
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'cover': cover,
+    'createdAt': (createdAt ?? DateTime.now()).millisecondsSinceEpoch,
+    'modifiedAt': (modifiedAt ?? DateTime.now()).millisecondsSinceEpoch,
+  };
+
+  Future<void> addBook(String uid) async {
+   final bookCollection = booksCollection(uid);
+
+    await bookCollection
+        .add(toJson())
+        .whenComplete(() => print("Notes item added to the database"));
+  }
+
+  Future<void> updateBook(String uid) async {
+    final bookCollection = booksCollection(uid);
+
+    await bookCollection
+        .document(id)
+        .updateData(toJson())
+        .whenComplete(() => print("Note item updated in the database"))
+        .catchError((e) => print(e));
+  }
 }
 
 List<Book> toBooks(QuerySnapshot query) => query.documents
