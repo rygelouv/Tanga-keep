@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       heroTag: null,
       icon: Icon(Icons.add),
       label: Text("New Book"),
-      onPressed: openCamera
+      onPressed: openBottomSheet
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
           debugPrint('--- noteEditor result: $command');
@@ -178,6 +178,31 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       context,
       MaterialPageRoute(
           builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: cameraSource)),
+    );
+  }
+
+  void openBottomSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 200,
+          color: Colors.amber,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text('Modal BottomSheet'),
+                ElevatedButton(
+                  child: const Text('Close BottomSheet'),
+                  onPressed: () => Navigator.pop(context),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
