@@ -24,4 +24,4 @@ CollectionReference booksCollection(String uid) => Firestore.instance.collection
 DocumentReference bookDocument(String id, String uid) => booksCollection(uid).document(id);
 
 /// Returns reference to the notes collection embedded in book collection
-CollectionReference notesCollection(String id, String uid) => bookDocument(id, uid).collection('notes');
+CollectionReference bookNotesCollection(String id, String uid) => bookDocument(id, uid).collection('notes');

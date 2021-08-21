@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:keep/model/book.dart';
 import 'package:keep/model/camera_source.dart';
@@ -118,16 +118,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             );
 
             // Attempt to take a picture and log where it's been saved.
-            await _controller.takePicture(path);
+            final image = await _controller.takePicture();
 
             switch(widget.cameraSource) {
               case CameraSource.book:
-                saveBookData(path);
+                saveBookData(image.path);
                 debugPrint("#### Book cover ######");
                 break;
               case CameraSource.note:
                 File croppedFile = await ImageCropper.cropImage(
-                    sourcePath: path,
+                    sourcePath: image.path,
                     aspectRatioPresets: [
                       CropAspectRatioPreset.square,
                       CropAspectRatioPreset.ratio3x2,
@@ -162,14 +162,14 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   void getTextFromImage(String imagePath) async {
     final File imageFile = File(imagePath);
-    final FirebaseVisionImage visionImage = FirebaseVisionImage.fromFile(imageFile);
-    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
-    final VisionText visionText = await textRecognizer.processImage(visionImage);
-    String text = visionText.text;
+    final textDetector = GoogleMlKit.vision.textDetector();
+    final visionImage = InputImage.fromFile(imageFile);
+    final RecognisedText recognisedText = await textDetector.processImage(visionImage);
+    String text = recognisedText.text;
     debugPrint(text);
 
     Note note = Note(content: text);
-    final command = await Navigator.pushReplacementNamed(context, '/note', arguments: {'note': note});
+    final command = await Navigator.pushReplacementNamed(context, '/note_editor', arguments: {'note': note});
     debugPrint('--- noteEditor result: $command');
 
     // If the picture was taken, display it on a new screen.

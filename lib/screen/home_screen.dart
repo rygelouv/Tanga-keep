@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
                     ),
                   ],
                 ),
+            drawer: AppDrawer(),
             floatingActionButton: _fab(context),
             bottomNavigationBar: _bottomActions(),
             floatingActionButtonLocation:
@@ -72,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     floating: true,
     snap: true,
     title: _topActions(context),
-    automaticallyImplyLeading: false,
     centerTitle: true,
     titleSpacing: 0,
     backgroundColor: Colors.transparent,
@@ -170,14 +170,10 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     // Get a specific camera from the list of available cameras.
     final firstCamera = cameras.first;
 
-    //Define the source of the camera like the screen
-    // from where the camera is called (note or book)
-    final cameraSource = CameraSource.book;
-
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: cameraSource)),
+          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.book)),
     );
   }
 
@@ -202,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
 
           final widget = BooksGrid.create;
 
-          return widget(books: books, onTap: (_) {});
+          return widget(books: books, onTap: _onBookTap);
         },
       );
 
@@ -217,11 +213,9 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         ),
       );
 
-  /// Callback on a single note clicked
+  /// Callback on a single book clicked
   void _onBookTap(Book book) async {
-    /*final command =
-        await Navigator.pushNamed(context, '/note', arguments: {'note': note});
-    processNoteCommand(_scaffoldKey.currentState, command);*/
+    await Navigator.pushNamed(context, '/note', arguments: {'book': book});
   }
 
   /// Create notes query
