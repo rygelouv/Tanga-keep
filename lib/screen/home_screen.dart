@@ -1,12 +1,16 @@
+import 'dart:developer';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:keep/model/book.dart';
 import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/service/book_api_service.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
 import 'package:keep/widget/books_grid.dart';
@@ -16,6 +20,9 @@ import 'package:keep/widget/notes_grid.dart';
 import 'package:keep/widget/notes_list.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
+import 'dart:convert' as convert;
+
+import 'package:http/http.dart' as http;
 
 import '../icons.dart';
 import '../styles.dart';
@@ -150,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       heroTag: null,
       icon: Icon(Icons.add),
       label: Text("New Book"),
-      onPressed: openCamera
+      onPressed: openBottomSheet
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
           debugPrint('--- noteEditor result: $command');
@@ -178,6 +185,40 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       context,
       MaterialPageRoute(
           builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: cameraSource)),
+    );
+  }
+
+  void openBottomSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 150,
+          color: Colors.white,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ElevatedButton(
+                  child: const Text('Take book cover picture'),
+                  onPressed: () => openCamera(),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(200, 30)
+                  ),
+                ),
+                ElevatedButton(
+                  child: const Text('Scan book barcode'),
+                  onPressed: () => openScanner(),
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: Size(200, 30)
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -233,5 +274,44 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         .snapshots()
         .handleError((e) => debugPrint('query books failed: $e'))
         .map((snapshot) => Book.fromQuery(snapshot));
+  }
+
+  void openScanner() async {
+    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666',
+        'Cancel',
+        true,
+        ScanMode.BARCODE);
+    print('----------  $barcodeScanRes  -----------');
+
+
+
+    /* Barcode scanner return -1 as a result when the user cancel the scan
+      So to avoid the api call, I need to check the value here. Because there
+      is no callback for the cancel button in the lib
+     */
+    if (barcodeScanRes != "-1") {
+      // Await the http get response, then decode the json-formatted response.
+      callApi(barcodeScanRes);
+    }
+  }
+
+  void callApi(String bookIsbn) async {
+    var response = await BookServiceApi(bookIsbn).execute();
+    if (response.statusCode == 200) {
+      var jsonResponse = convert.jsonDecode(response.body) as Map<String, dynamic>;
+      var data = jsonResponse['items'].first['volumeInfo'];
+      Book book = Book(title: data['title']);
+      if (data['imageLinks'] == null) {
+        book.cover = "";
+      } else {
+        book.cover = data['imageLinks']['thumbnail'];
+      }
+      print('Book ${book.title} ---- ${book.cover}----');
+      Navigator.of(context)
+          .pushReplacementNamed('/book', arguments: {'book': book});
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+    }
   }
 }
