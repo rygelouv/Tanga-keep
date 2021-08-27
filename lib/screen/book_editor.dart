@@ -28,6 +28,8 @@ class _BookEditorState extends State<BookEditor> {
 
   final Book _book;
 
+  bool _validURL = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +45,7 @@ class _BookEditorState extends State<BookEditor> {
   @override
   Widget build(BuildContext context) {
     final uid = Provider.of<CurrentUser>(context).data.uid;
+    _validURL = Uri.parse(_book.cover).isAbsolute;
     return Scaffold(
         resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -66,9 +69,7 @@ class _BookEditorState extends State<BookEditor> {
             ),
             textCapitalization: TextCapitalization.sentences,
         ),
-          Image.file(
-                  File(_book.cover),
-              ),
+          _book.cover == "" ? showBookCover() : const Text("No cover image for this book")
         ]
       ),
       ),
@@ -86,16 +87,21 @@ class _BookEditorState extends State<BookEditor> {
   }
 
   Future _onSave(String uid) async {
-    var newFileName = _bookTitleController.text.replaceAll(new RegExp(r"\s+"), "").toLowerCase();
-    final newFile = await changeFileNameOnly(File(_book.cover), newFileName);
-    StorageUploadTask uploadTask = storageReference(newFile.path).putFile(newFile);
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    await storageReference(newFile.path).getDownloadURL().then((fileURL) {
+    _book.title = _bookTitleController.text;
+    print("---------- $_validURL--------");
+    if (_validURL != true && _book.cover != "") {
+      var newFileName = _bookTitleController.text.replaceAll(
+          new RegExp(r"\s+"), "").toLowerCase();
+      final newFile = await changeFileNameOnly(File(_book.cover), newFileName);
+      StorageUploadTask uploadTask = storageReference(newFile.path).putFile(
+          newFile);
+      await uploadTask.onComplete;
+      print('File Uploaded');
+      await storageReference(newFile.path).getDownloadURL().then((fileURL) {
         _book.cover = fileURL;
         print(fileURL);
-    });
-    _book.title = _bookTitleController.text;
+      });
+    }
     _book.addBook(uid);
     Navigator.pop(context);
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
@@ -111,5 +117,21 @@ class _BookEditorState extends State<BookEditor> {
     var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
     var newPath = path.substring(0, lastSeparator + 1) + newFileName + "$ext";
     return file.rename(newPath);
+  }
+
+  Widget showBookCover() {
+    if(_book.cover.isEmpty) {
+      return const Text(
+          "No cover image for this book",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 25,
+          color: kErrorColorLight
+        ),
+      );
+    } else {
+      return _validURL? Image.network(_book.cover) : Image.file(
+          File(_book.cover));
+    }
   }
 }
