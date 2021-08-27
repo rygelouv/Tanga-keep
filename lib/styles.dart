@@ -48,6 +48,8 @@ const kAccentColorLight = MaterialColor(
   },
 );
 
+const kNewAccentColor = Color(0xFFFF2D55);
+
 /// Available note background colors
 const Iterable<Color> kNoteColors = [
   Colors.white,
