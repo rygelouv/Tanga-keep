@@ -2,9 +2,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:keep/model/book.dart';
+import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
@@ -19,8 +22,12 @@ import 'camera_screen.dart';
 
 /// Home screen, displays [Note] grid or list.
 class NoteScreen extends StatefulWidget {
+  const NoteScreen({Key key, @required this.book}) : super(key: key);
+
+  final Book book;
+
   @override
-  State<StatefulWidget> createState() => _NoteScreen();
+  State<StatefulWidget> createState() => _NoteScreen(book);
 }
 
 /// [State] of [HomeScreen].
@@ -29,6 +36,9 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
 
   /// `true` to show notes in a GridView, a ListView otherwise.
   bool _gridView = true;
+
+  _NoteScreen(this._book);
+  final Book _book;
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
@@ -77,7 +87,6 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
                 ),
               ),
             ),
-            drawer: AppDrawer(),
             floatingActionButton: canCreate ? _fab(context) : null,
             bottomNavigationBar: canCreate ? _bottomActions() : null,
             floatingActionButtonLocation:
@@ -90,27 +99,14 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
   );
 
   Widget _appBar(BuildContext context, NoteFilter filter, Widget bottom) =>
-      filter.noteState < NoteState.archived
-          ? SliverAppBar(
+      SliverAppBar(
         floating: true,
         snap: true,
-        title: _topActions(context),
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        titleSpacing: 0,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      )
-          : SliverAppBar(
-        floating: true,
-        snap: true,
-        title: Text(filter.noteState.filterName),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          tooltip: 'Menu',
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        title: Text(_book.title,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)
         ),
-        automaticallyImplyLeading: false,
+        titleSpacing: 0,
+        elevation: 0,
       );
 
   Widget _topActions(BuildContext context) => Container(
@@ -207,7 +203,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera)),
+          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.note,)),
     );
   }
 
@@ -296,7 +292,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
   /// Callback on a single note clicked
   void _onNoteTap(Note note) async {
     final command =
-    await Navigator.pushNamed(context, '/note', arguments: {'note': note});
+    await Navigator.pushNamed(context, '/note_editor', arguments: {'note': note});
     processNoteCommand(_scaffoldKey.currentState, command);
   }
 
@@ -308,7 +304,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         (user?.metadata?.creationTime?.millisecondsSinceEpoch ?? 0);
     final useIndexes = sinceSignUp >=
         _10_min_millis; // since creating indexes takes time, avoid using composite index until later
-    final collection = notesCollection(user?.uid);
+    final collection = bookNotesCollection(_book.id, user?.uid);
     final query = filter.noteState == NoteState.unspecified
         ? collection
         .where('state',

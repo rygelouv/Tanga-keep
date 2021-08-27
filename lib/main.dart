@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:keep/screen/book_editor.dart';
+import 'package:keep/screen/note_screen.dart';
 
 import 'package:provider/provider.dart';
 
@@ -69,13 +70,17 @@ class NotesApp extends StatelessWidget {
     final path = uri.path ?? '';
     // final q = uri.queryParameters ?? <String, String>{};
     switch (path) {
-      case '/note': {
+      case '/note_editor': {
         final note = (settings.arguments as Map ?? {})['note'];
         return _buildRoute(settings, (_) => NoteEditor(note: note));
       }
       case '/book': {
         final book = (settings.arguments as Map ?? {})['book'];
         return _buildRoute(settings, (_) => BookEditor(book: book));
+      }
+      case '/note': {
+        final book = (settings.arguments as Map ?? {})['book'];
+        return _buildRoute(settings, (_) => NoteScreen(book: book));
       }
       default:
         return null;
