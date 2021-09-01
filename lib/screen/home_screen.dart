@@ -66,11 +66,10 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
                     ),
                   ],
                 ),
-            drawer: AppDrawer(),
             floatingActionButton: _fab(context),
             bottomNavigationBar: _bottomActions(),
             floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
+                FloatingActionButtonLocation.centerDocked,
             extendBody: true,
           ),
         ),
@@ -79,9 +78,13 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   Widget _appBar(BuildContext context) => SliverAppBar(
     floating: true,
     snap: true,
-    title: _topActions(context),
-    centerTitle: true,
-    titleSpacing: 0,
+    title: Text("Home",
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          color: Theme.of(context).accentColor
+        )
+    ),
     backgroundColor: Colors.transparent,
     elevation: 0,
   );
@@ -132,31 +135,25 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       );
 
   Widget _bottomActions() => BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        /*child: Container(
-          height: kBottomBarSize,
-          padding: const EdgeInsets.symmetric(horizontal: 17),
-          child: Row(
-            children: <Widget>[
-              const Icon(AppIcons.checkbox, size: 26, color: kIconTintLight),
-              const SizedBox(width: 30),
-              const Icon(AppIcons.brush_sharp, size: 26, color: kIconTintLight),
-              const SizedBox(width: 30),
-              const Icon(AppIcons.mic, size: 26, color: kIconTintLight),
-              const SizedBox(width: 30),
-              const Icon(AppIcons.insert_photo,
-                  size: 26, color: kIconTintLight),
-            ],
-          ),
-        ),*/
-      );
+    shape: CircularNotchedRectangle(),
+    color: Colors.blueGrey,
+    notchMargin: 2.0,
+    clipBehavior: Clip.antiAlias,
+    child: BottomNavigationBar(items: [
+      BottomNavigationBarItem(
+          icon: Icon(Icons.house_rounded), label: "Home"),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.watch_later), label: "Recent"),
+    ],
+        selectedItemColor: Theme.of(context).accentColor
+    ),
+  );
 
-  Widget _fab(BuildContext context) => FloatingActionButton.extended(
+  Widget _fab(BuildContext context) => FloatingActionButton(
       backgroundColor: Theme.of(context).accentColor,
       //child: const Icon(Icons.add),
       heroTag: null,
-      icon: Icon(Icons.add),
-      label: Text("New Book"),
+      child: Icon(Icons.add_outlined),
       onPressed: openBottomSheet
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');

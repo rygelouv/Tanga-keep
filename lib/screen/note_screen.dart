@@ -103,7 +103,11 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         floating: true,
         snap: true,
         title: Text(_book.title,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          color: Theme.of(context).accentColor
+        )
         ),
         titleSpacing: 0,
         elevation: 0,

@@ -25,7 +25,7 @@ class NotesApp extends StatelessWidget {
         theme: Theme.of(context).copyWith(
           brightness: Brightness.light,
           primaryColor: Colors.white,
-          accentColor: kAccentColorLight,
+          accentColor: kNewAccentColor,
           appBarTheme: AppBarTheme.of(context).copyWith(
             elevation: 0,
             brightness: Brightness.light,
