@@ -9,6 +9,7 @@ import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
+import 'package:keep/widget/bottom_navigation.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
 import 'package:keep/widget/notes_list.dart';
@@ -88,9 +89,9 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
               ),
             ),
             floatingActionButton: canCreate ? _fab(context) : null,
-            bottomNavigationBar: canCreate ? _bottomActions() : null,
+            bottomNavigationBar: BottomNavigation(),
             floatingActionButtonLocation:
-            FloatingActionButtonLocation.centerFloat,
+            FloatingActionButtonLocation.centerDocked,
             extendBody: true,
           );
         },
@@ -178,12 +179,11 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         ),*/
   );
 
-  Widget _fab(BuildContext context) => FloatingActionButton.extended(
+  Widget _fab(BuildContext context) => FloatingActionButton(
       backgroundColor: Theme.of(context).accentColor,
       //child: const Icon(Icons.add),
       heroTag: null,
-      icon: Icon(Icons.add),
-      label: Text("New Note"),
+      child: Icon(Icons.add_outlined),
       onPressed: openCamera
     /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
