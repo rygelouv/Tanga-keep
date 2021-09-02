@@ -15,7 +15,6 @@ import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
 import 'package:keep/widget/books_grid.dart';
 import 'package:keep/widget/books_list.dart';
-import 'package:keep/widget/bottom_navigation.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
 import 'package:keep/widget/notes_list.dart';
@@ -68,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
                   ],
                 ),
             floatingActionButton: _fab(context),
-            bottomNavigationBar: BottomNavigation(),
+            bottomNavigationBar: _bottomActions(),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             extendBody: true,
@@ -135,6 +134,20 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         ),
       );
 
+  Widget _bottomActions() => BottomAppBar(
+    shape: CircularNotchedRectangle(),
+    color: Colors.blueGrey,
+    notchMargin: 2.0,
+    clipBehavior: Clip.antiAlias,
+    child: BottomNavigationBar(items: [
+      BottomNavigationBarItem(
+          icon: Icon(Icons.house_rounded), label: "Home"),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.watch_later), label: "Recent"),
+    ],
+        selectedItemColor: Theme.of(context).accentColor
+    ),
+  );
 
   Widget _fab(BuildContext context) => FloatingActionButton(
       backgroundColor: Theme.of(context).accentColor,
