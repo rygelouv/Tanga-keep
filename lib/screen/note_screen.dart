@@ -207,7 +207,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.note,)),
+          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.note, bookId: _book.id)),
     );
   }
 

@@ -19,29 +19,32 @@ import '../styles.dart';
 class NoteEditor extends StatefulWidget {
   /// Create a [NoteEditor],
   /// provides an existed [note] in edit mode, or `null` to create a new one.
-  const NoteEditor({Key key, this.note}) : super(key: key);
+  const NoteEditor({Key key, this.note, this.bookId}) : super(key: key);
 
   final Note note;
+  final String bookId;
 
   @override
-  State<StatefulWidget> createState() => _NoteEditorState(note);
+  State<StatefulWidget> createState() => _NoteEditorState(note, bookId);
 }
 
 /// [State] of [NoteEditor].
 class _NoteEditorState extends State<NoteEditor> with CommandHandler {
   /// Create a state for [NoteEditor], with an optional [note] being edited,
   /// otherwise a new one will be created.
-  _NoteEditorState(Note note)
+  _NoteEditorState(Note note, String bookId)
     : this._note = note ?? Note(),
     _originNote = note?.copy() ?? Note(),
     this._titleTextController = TextEditingController(text: note?.title),
-    this._contentTextController = TextEditingController(text: note?.content);
+    this._contentTextController = TextEditingController(text: note?.content),
+    this._bookId = bookId;
 
   /// The note in editing
   final Note _note;
   /// The origin copy before editing
   final Note _originNote;
   Color get _noteColor => _note.color ?? kDefaultNoteColor;
+  final String _bookId;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   StreamSubscription<Note> _noteSubscription;
@@ -104,7 +107,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
                 floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
                 floatingActionButton: FloatingActionButton.extended(
                   backgroundColor: Theme.of(context).accentColor,
-                  onPressed: () => _onPop(uid, false),
+                  onPressed: () => _onPop(_bookId, uid, false),
                   heroTag: null,
                   icon: Icon(Icons.check),
                   label: Text("Save"),
@@ -120,7 +123,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
   Widget _buildBody(BuildContext context, String uid) => DefaultTextStyle(
     style: kNoteTextLargeLight,
     child: WillPopScope(
-      onWillPop: () => _onPop(uid, true),
+      onWillPop: () => _onPop(_bookId, uid, true),
       child: Container(
         height: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -240,11 +243,11 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
   }
 
   /// Callback before the user leave the editor.
-  Future<bool> _onPop(String uid, bool isInstantLeave) {
+  Future<bool> _onPop(String bookId, String uid, bool isInstantLeave) {
     if (!isInstantLeave && _isDirty && (_note.id != null || _note.isNotEmpty)) {
       _note
         ..modifiedAt = DateTime.now()
-        ..saveToFireStore(uid);
+        ..saveToFireStore(bookId, uid);
       Navigator.pop(context);
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
     }
