@@ -9,6 +9,7 @@ import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
+import 'package:keep/widget/bottom_navigation.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
 import 'package:keep/widget/notes_list.dart';
@@ -87,8 +88,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
                 ),
               ),
             ),
-            floatingActionButton: canCreate ? _fab(context) : null,
-            bottomNavigationBar: canCreate ? _bottomActions() : null,
+            floatingActionButton: _fab(context),
             floatingActionButtonLocation:
             FloatingActionButtonLocation.centerFloat,
             extendBody: true,
