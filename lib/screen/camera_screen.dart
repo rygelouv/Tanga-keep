@@ -37,20 +37,25 @@ Future<void> main() async {
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
   final CameraSource cameraSource;
+  final String bookId;
 
   const TakePictureScreen({
     Key key,
     @required this.camera,
-    @required this.cameraSource,
+    @required this.cameraSource, this.bookId,
   }) : super(key: key);
 
   @override
-  TakePictureScreenState createState() => TakePictureScreenState();
+  TakePictureScreenState createState() => TakePictureScreenState(bookId);
 }
 
 class TakePictureScreenState extends State<TakePictureScreen> {
   CameraController _controller;
   Future<void> _initializeControllerFuture;
+
+  TakePictureScreenState(this._bookId);
+
+  final String _bookId;
 
   @override
   void initState() {
@@ -169,7 +174,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     debugPrint(text);
 
     Note note = Note(content: text);
-    final command = await Navigator.pushReplacementNamed(context, '/note_editor', arguments: {'note': note});
+    final command = await Navigator.pushReplacementNamed(context, '/note_editor', arguments: {'note': note, 'bookId': _bookId});
     debugPrint('--- noteEditor result: $command');
 
     // If the picture was taken, display it on a new screen.

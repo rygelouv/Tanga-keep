@@ -3,6 +3,7 @@ import 'package:collection_ext/iterables.dart';
 import 'package:flutter/material.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/screen/home_screen.dart';
+import 'package:keep/service/books_service.dart';
 
 import '../styles.dart';
 
@@ -138,9 +139,9 @@ extension NoteStore on Note {
   /// Save this note in FireStore.
   ///
   /// If this's a new note, a FireStore document will be created automatically.
-  Future<dynamic> saveToFireStore(String uid) async {
+  Future<dynamic> saveToFireStore(String bookId, String uid) async {
     debugPrint(".... Saving to firestore....");
-    final col = notesCollection(uid);
+    final col = bookNotesCollection(bookId, uid);
     return id == null
       ? col.add(toJson())
       : col.document(id).updateData(toJson());
