@@ -11,6 +11,8 @@ import 'package:keep/model/note.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 
+import 'home_screen.dart';
+
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
@@ -37,25 +39,25 @@ Future<void> main() async {
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
   final CameraSource cameraSource;
-  final String bookId;
+  final Book book;
 
   const TakePictureScreen({
     Key key,
     @required this.camera,
-    @required this.cameraSource, this.bookId,
+    @required this.cameraSource, this.book,
   }) : super(key: key);
 
   @override
-  TakePictureScreenState createState() => TakePictureScreenState(bookId);
+  TakePictureScreenState createState() => TakePictureScreenState(book);
 }
 
 class TakePictureScreenState extends State<TakePictureScreen> {
   CameraController _controller;
   Future<void> _initializeControllerFuture;
 
-  TakePictureScreenState(this._bookId);
+  TakePictureScreenState(this._book);
 
-  final String _bookId;
+  Book _book;
 
   @override
   void initState() {
@@ -174,7 +176,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     debugPrint(text);
 
     Note note = Note(content: text);
-    final command = await Navigator.pushReplacementNamed(context, '/note_editor', arguments: {'note': note, 'bookId': _bookId});
+    final command = await Navigator.pushNamed(context, '/note_editor',
+        arguments: {'note': note, 'bookId': _book.id});
     debugPrint('--- noteEditor result: $command');
 
     // If the picture was taken, display it on a new screen.
@@ -191,10 +194,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
   }
 
-  void saveBookData(String path) {
-    Book book = Book(cover: path);
+  void saveBookData(String path) async {
+    print("------------------- Book saving --------------------");
+    _book.cover = path;
+    //Navigator.pop(context, _book);
+   Navigator.pop(context);
     Navigator.of(context)
-        .pushReplacementNamed('/book', arguments: {'book': book});
+        .pushNamed('/book', arguments: {'book': _book});
   }
 }
 
