@@ -192,6 +192,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         },*/
   );
 
+
   void openCamera() async {
     debugPrint("opening Camera");
     // Ensure that plugin services are initialized so that `availableCameras()`
@@ -207,7 +208,8 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.note, bookId: _book.id)),
+          builder: (context) => TakePictureScreen(camera: firstCamera,
+              cameraSource: CameraSource.note, book: _book)),
     );
   }
 

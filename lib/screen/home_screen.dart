@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       //child: const Icon(Icons.add),
       heroTag: null,
       child: Icon(Icons.add_outlined),
-      onPressed: openBottomSheet
+      onPressed: openScanner
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
           debugPrint('--- noteEditor result: $command');
@@ -149,58 +149,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         },*/
       );
 
-  void openCamera() async {
-    debugPrint("opening Camera");
-    // Ensure that plugin services are initialized so that `availableCameras()`
-    // can be called before `runApp()`
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // Obtain a list of the available cameras on the device.
-    final cameras = await availableCameras();
-
-    // Get a specific camera from the list of available cameras.
-    final firstCamera = cameras.first;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: firstCamera, cameraSource: CameraSource.book)),
-    );
-  }
-
-  void openBottomSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 150,
-          color: Colors.white,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ElevatedButton(
-                  child: const Text('Take book cover picture'),
-                  onPressed: () => openCamera(),
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(200, 30)
-                  ),
-                ),
-                ElevatedButton(
-                  child: const Text('Scan book barcode'),
-                  onPressed: () => openScanner(),
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: Size(200, 30)
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildAvatar(BuildContext context) {
     final url = Provider.of<CurrentUser>(context)?.data?.photoUrl;
@@ -287,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
       }
       print('Book ${book.title} ---- ${book.cover}----');
       Navigator.of(context)
-          .pushReplacementNamed('/book', arguments: {'book': book});
+          .pushNamed('/book', arguments: {'book': book});
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
