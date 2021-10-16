@@ -44,23 +44,26 @@ class Book extends ChangeNotifier {
     final bookCollection = booksCollection(uid);
 
     await bookCollection
-        .document(id)
-        .updateData(toJson())
+        .doc(id)
+        .update(toJson())
         .whenComplete(() => print("Note item updated in the database"))
         .catchError((e) => print(e));
   }
 }
 
-List<Book> toBooks(QuerySnapshot query) => query.documents
+List<Book> toBooks(QuerySnapshot query) => query.docs
     .map((d) => toBook(d))
     .where((n) => n != null)
     .toList();
 
-Book toBook(DocumentSnapshot doc) => doc.exists
-    ? Book(
-  id: doc.documentID,
-  title: doc.data['title'],
-  cover: doc.data['cover'],
-  createdAt: DateTime.fromMillisecondsSinceEpoch(doc.data['createdAt'] ?? 0),
-  modifiedAt: DateTime.fromMillisecondsSinceEpoch(doc.data['modifiedAt'] ?? 0),
-) : null;
+Book toBook(DocumentSnapshot doc) {
+  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+  if(data.isNotEmpty)
+    return Book(
+  id: data['documentID'],
+  title: data['title'],
+  cover: data['cover'],
+  createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt'] ?? 0),
+  modifiedAt: DateTime.fromMillisecondsSinceEpoch(data['modifiedAt'] ?? 0),
+  );  else return null;
+}
