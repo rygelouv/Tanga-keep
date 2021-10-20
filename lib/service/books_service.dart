@@ -13,15 +13,15 @@ import 'package:path/path.dart' as Path;
 
 /// Returns reference to the storage
 /// We will need Firebase Storage to store the book cover
-StorageReference storageReference(cover) => FirebaseStorage.instance
+Reference storageReference(cover) => FirebaseStorage.instance
     .ref()
     .child("books/${Path.basename(cover)}");
 
 /// Returns reference to the books collection of the user [uid].
-CollectionReference booksCollection(String uid) => Firestore.instance.collection('books-$uid');
+CollectionReference booksCollection(String uid) => FirebaseFirestore.instance.collection('books-$uid');
 
 /// Returns reference to the given book [id] of the user [uid].
-DocumentReference bookDocument(String id, String uid) => booksCollection(uid).document(id);
+DocumentReference bookDocument(String id, String uid) => booksCollection(uid).doc(id);
 
 /// Returns reference to the notes collection embedded in book collection
 CollectionReference bookNotesCollection(String id, String uid) => bookDocument(id, uid).collection('notes');

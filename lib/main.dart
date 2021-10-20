@@ -1,8 +1,10 @@
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:keep/screen/book_editor.dart';
 import 'package:keep/screen/note_screen.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
 
@@ -11,13 +13,30 @@ import 'screens.dart' show HomeScreen, LoginScreen, NoteEditor, SettingsScreen;
 import 'styles.dart';
 
 
-void main() => runApp(NotesApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  initPlatformState();
+  runApp(NotesApp());
+}
+
+Future<void> initPlatformState() async {
+  //Remove this method to stop OneSignal Debugging
+  OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+
+  OneSignal.shared.setAppId("00e4ca93-54c7-4c34-b9d4-ba4195bb36da");
+
+// The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+  OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
+    print("Accepted permission: $accepted");
+  });
+}
 
 class NotesApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => StreamProvider.value(
-    value: FirebaseAuth.instance.onAuthStateChanged.map((user) => CurrentUser.create(user)),
+    value: FirebaseAuth.instance.authStateChanges().map((user) => CurrentUser.create(user)),
     initialData: CurrentUser.initial,
     child: Consumer<CurrentUser>(
       builder: (context, user, _) => MaterialApp(

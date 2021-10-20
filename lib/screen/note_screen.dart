@@ -215,7 +215,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
 
 
   Widget _buildAvatar(BuildContext context) {
-    final url = Provider.of<CurrentUser>(context)?.data?.photoUrl;
+    final url = Provider.of<CurrentUser>(context)?.data?.photoURL;
     return CircleAvatar(
       backgroundImage: url != null ? NetworkImage(url) : null,
       child: url == null ? const Icon(Icons.face) : null,

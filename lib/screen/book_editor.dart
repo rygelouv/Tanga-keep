@@ -95,14 +95,16 @@ class _BookEditorState extends State<BookEditor> {
           .replaceAll(new RegExp(r"\s+"), "")
           .toLowerCase();
       final newFile = await changeFileNameOnly(File(_book.cover), newFileName);
-      StorageUploadTask uploadTask =
+      UploadTask uploadTask =
           storageReference(newFile.path).putFile(newFile);
-      await uploadTask.onComplete;
-      print('File Uploaded');
-      await storageReference(newFile.path).getDownloadURL().then((fileURL) {
-        _book.cover = fileURL;
-        print(fileURL);
+      await uploadTask.whenComplete(() async => {
+        print('File Uploaded'),
+            await storageReference(newFile.path).getDownloadURL().then((fileURL) {
+          _book.cover = fileURL;
+          print(fileURL);
+        })
       });
+
     }
     _book.addBook(uid);
     Navigator.pushAndRemoveUntil(

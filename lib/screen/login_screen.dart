@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, AuthResult, GoogleAuthProvider;
+import 'package:firebase_auth/firebase_auth.dart' show AuthResult, FirebaseAuth, GoogleAuthProvider, UserCredential;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
@@ -157,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final googleUser = await _googleSignIn.signIn();
       final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.getCredential(
+      final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
         accessToken: googleAuth.accessToken,
       );
@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<AuthResult> _doEmailSignIn(String email, String password, {bool signUp = false}) => (signUp
+  Future<UserCredential> _doEmailSignIn(String email, String password, {bool signUp = false}) => (signUp
     ? _auth.createUserWithEmailAndPassword(email: email, password: password)
     : _auth.signInWithEmailAndPassword(email: email, password: password)
   ).catchError((e) {
