@@ -1,5 +1,8 @@
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:keep/screen/book_editor.dart';
@@ -33,6 +36,10 @@ Future<void> initPlatformState() async {
 }
 
 class NotesApp extends StatelessWidget {
+  static FirebaseAnalytics analytics = FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer =
+  FirebaseAnalyticsObserver(analytics: analytics);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => StreamProvider.value(
@@ -47,6 +54,7 @@ class NotesApp extends StatelessWidget {
           accentColor: kNewAccentColor,
           appBarTheme: AppBarTheme.of(context).copyWith(
             elevation: 0,
+            backgroundColor: Colors.white,
             brightness: Brightness.light,
             iconTheme: IconThemeData(
               color: kIconTintLight,
@@ -61,6 +69,7 @@ class NotesApp extends StatelessWidget {
             ),
           ),
         ),
+        navigatorObservers: <NavigatorObserver>[observer],
         home: user.isInitialValue
           ? Scaffold(body: const SizedBox())
           : user.data != null ? HomeScreen() : LoginScreen(),
