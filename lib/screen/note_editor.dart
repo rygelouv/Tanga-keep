@@ -248,8 +248,13 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
       _note
         ..modifiedAt = DateTime.now()
         ..saveToFireStore(bookId, uid);
-      Navigator.pop(context);
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => HomeScreen(),
+        ),
+            (route) => false,
+      );
     }
     return Future.value(true);
   }

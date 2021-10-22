@@ -60,7 +60,7 @@ Book toBook(DocumentSnapshot doc) {
   Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
   if(data.isNotEmpty)
     return Book(
-  id: data['documentID'],
+  id: doc.id,
   title: data['title'],
   cover: data['cover'],
   createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt'] ?? 0),
