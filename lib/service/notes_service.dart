@@ -120,10 +120,10 @@ extension NoteQuery on QuerySnapshot {
 extension NoteDocument on DocumentSnapshot {
   /// Transforms the query result into a list of notes.
   Note toNote() {
-    Map<String, dynamic> data = this.data as Map<String, dynamic>;
+    Map<String, dynamic> data = this.data() as Map<String, dynamic>;
     if(data.isNotEmpty)
         return Note(
-      id: data['documentId'],
+      id: this.id,
       title: data['title'],
       content: data['content'],
       color: _parseColor(data['color']),
