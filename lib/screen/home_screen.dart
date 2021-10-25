@@ -11,6 +11,8 @@ import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/screen/book_screen.dart';
+import 'package:keep/screen/profile_screen.dart';
 import 'package:keep/service/book_api_service.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
@@ -43,6 +45,12 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
 
   /// `true` to show notes in a GridView, a ListView otherwise.
   bool _gridView = true;
+  int _selectedIndex = 0;
+
+  static List<Widget> _children = <Widget>[
+   BookScreen(),
+    ProfileScreen()
+  ];
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
@@ -54,22 +62,9 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         child: StreamProvider.value(
           value: _createBookStream(context),
           child: Scaffold(
-            body: CustomScrollView(
-                  slivers: <Widget>[
-                    _appBar(context), // a floating appbar
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 24), // top spacing
-                    ),
-                    _buildBooksView(context),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(
-                          height:
-                              80.0), // bottom spacing make sure the content can scroll above the bottom bar
-                    ),
-                  ],
-                ),
+            body: _children[_selectedIndex],
             floatingActionButton: _fab(context),
-            bottomNavigationBar: BottomNavigation(),
+            bottomNavigationBar: _bottonNavigation(),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             extendBody: true,
@@ -77,19 +72,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         ),
       );
 
-  Widget _appBar(BuildContext context) => SliverAppBar(
-    floating: true,
-    snap: true,
-    title: Text("Home",
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-          color: Theme.of(context).accentColor
-        )
-    ),
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-  );
+
 
   Widget _topActions(BuildContext context) => Container(
         // width: double.infinity,
@@ -160,38 +143,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     );
   }
 
-  /// A grid/list view to display notes
-  ///
-  /// Notes are divided to `Pinned` and `Others` when there's no filter,
-  /// and a blank view will be rendered, if no note found.
-  Widget _buildBooksView(BuildContext context) => Consumer<List<Book>>(
-        builder: (context, books, _) {
-          if (books?.isNotEmpty != true) {
-            return _buildBlankView();
-          }
-
-          final widget = BooksGrid.create;
-
-          return widget(books: books, onTap: _onBookTap);
-        },
-      );
-
-  Widget _buildBlankView() => const SliverFillRemaining(
-        hasScrollBody: false,
-        child: Text(
-          'Notes you add appear here',
-          style: TextStyle(
-            color: Colors.black54,
-            fontSize: 14,
-          ),
-        ),
-      );
-
-  /// Callback on a single book clicked
-  void _onBookTap(Book book) async {
-    await Navigator.pushNamed(context, '/note', arguments: {'book': book});
-  }
-
   /// Create notes query
   Stream<List<Book>> _createBookStream(BuildContext context) {
     final user = Provider.of<CurrentUser>(context)?.data;
@@ -240,5 +191,23 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
+  }
+
+  Widget _bottonNavigation() {
+    return BottomNavigationBar(
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.house_rounded), label: "Home"),
+        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Profile"),
+      ],
+      currentIndex: _selectedIndex,
+      selectedItemColor: Theme.of(context).accentColor,
+      onTap: _onItemTapped,
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 }
