@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' show AuthResult, FirebaseAuth,
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn;
+import 'package:keep/screens.dart';
 
 import '../styles.dart';
 
@@ -162,6 +163,13 @@ class _LoginScreenState extends State<LoginScreen> {
         accessToken: googleAuth.accessToken,
       );
       await _auth.signInWithCredential(credential);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => HomeScreen(),
+        ),
+            (route) => false,
+      );
     } catch (e, s) {
       debugPrint('google signIn failed: $e. $s');
       errMsg = 'Login failed, please try again later.';
