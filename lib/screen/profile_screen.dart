@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 10,
               ),
               Text(
-                user.displayName,
+                user.displayName == null? "" : user.displayName,
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.bold,

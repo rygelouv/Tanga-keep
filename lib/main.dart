@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:keep/screen/book_editor.dart';
 import 'package:keep/screen/note_screen.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -57,16 +58,24 @@ class NotesApp extends StatelessWidget {
             backgroundColor: Colors.white,
             brightness: Brightness.light,
             iconTheme: IconThemeData(
-              color: kIconTintLight,
+              color: kNewAccentColor,
             ),
           ),
-          scaffoldBackgroundColor: Colors.white,
-          bottomAppBarColor: kBottomAppBarColorLight,
-          primaryTextTheme: Theme.of(context).primaryTextTheme.copyWith(
-            // title
-            headline6: const TextStyle(
-              color: kIconTintLight,
-            ),
+          scaffoldBackgroundColor: kBorderColorLightGray,
+          bottomAppBarColor: Colors.white,
+          bottomAppBarTheme: BottomAppBarTheme(
+            shape: CircularNotchedRectangle(),
+          ),
+          textTheme: GoogleFonts.montserratTextTheme(
+              Theme.of(context).textTheme
+          ),
+          primaryTextTheme: GoogleFonts.montserratTextTheme(
+              Theme.of(context).primaryTextTheme.copyWith(
+                // title
+                headline6: const TextStyle(
+                  color: kIconTintLight,
+                ),
+              )
           ),
         ),
         navigatorObservers: <NavigatorObserver>[observer],

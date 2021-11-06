@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:keep/model/book.dart';
 import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
@@ -16,6 +17,7 @@ import 'package:keep/screen/profile_screen.dart';
 import 'package:keep/service/book_api_service.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
+import 'package:keep/tanga_custom_icons_icons.dart';
 import 'package:keep/widget/books_grid.dart';
 import 'package:keep/widget/books_list.dart';
 import 'package:keep/widget/bottom_navigation.dart';
@@ -47,10 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   bool _gridView = true;
   int _selectedIndex = 0;
 
-  static List<Widget> _children = <Widget>[
-   BookScreen(),
-    ProfileScreen()
-  ];
+  static List<Widget> _children = <Widget>[BookScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
@@ -71,8 +70,6 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
           ),
         ),
       );
-
-
 
   Widget _topActions(BuildContext context) => Container(
         // width: double.infinity,
@@ -119,20 +116,19 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         ),
       );
 
-
   Widget _fab(BuildContext context) => FloatingActionButton(
       backgroundColor: Theme.of(context).accentColor,
       //child: const Icon(Icons.add),
       heroTag: null,
-      child: Icon(Icons.add_outlined),
-      onPressed: openScanner
+      elevation: 10,
+      child: Icon(TangaCustomIcons.plus, size: 30),
+      onPressed: () => openScanner(context)
       /*onPressed: () async {
           final command = await Navigator.pushNamed(context, '/note');
           debugPrint('--- noteEditor result: $command');
           processNoteCommand(_scaffoldKey.currentState, command);
         },*/
       );
-
 
   Widget _buildAvatar(BuildContext context) {
     final url = Provider.of<CurrentUser>(context)?.data?.photoURL;
@@ -154,20 +150,55 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         .map((snapshot) => Book.fromQuery(snapshot));
   }
 
-  void openScanner() async {
+  void openScanner(BuildContext context) async {
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+          //the rounded corner is created here
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        context: context,
+        builder: (_) {
+          return Container(
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text("Scan the book's barcode",),
+                ),
+                Padding(
+                    padding: EdgeInsets.only(top: 20, bottom: 20),
+                    child: Image.asset('assets/images/barcode_scanner.png'),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: ElevatedButton(
+                      onPressed: () => {
+                        launchScanner(),
+                        Navigator.pop(context)
+                      },
+                      child: Text("Scan Book"),
+                      style: ElevatedButton.styleFrom(
+                        textStyle: GoogleFonts.montserrat(
+                            textStyle: TextStyle(fontSize: 14, color: Colors.white)
+                        ),
+                        primary: kNewAccentColor
+                      )
+                  ),
+                )
+              ],
+            ),
+          );
+        });
+  }
+
+  void launchScanner() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666',
-        'Cancel',
-        true,
-        ScanMode.BARCODE);
+        '#ff6666', 'Cancel', false, ScanMode.BARCODE);
     print('----------  $barcodeScanRes  -----------');
 
-
-
-    /* Barcode scanner return -1 as a result when the user cancel the scan
+    /*Barcode scanner return -1 as a result when the user cancel the scan
       So to avoid the api call, I need to check the value here. Because there
-      is no callback for the cancel button in the lib
-     */
+      is no callback for the cancel button in the lib*/
     if (barcodeScanRes != "-1") {
       // Await the http get response, then decode the json-formatted response.
       callApi(barcodeScanRes);
@@ -177,7 +208,8 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
   void callApi(String bookIsbn) async {
     var response = await BookServiceApi(bookIsbn).execute();
     if (response.statusCode == 200) {
-      var jsonResponse = convert.jsonDecode(response.body) as Map<String, dynamic>;
+      var jsonResponse =
+          convert.jsonDecode(response.body) as Map<String, dynamic>;
       var data = jsonResponse['items'].first['volumeInfo'];
       Book book = Book(title: data['title']);
       if (data['imageLinks'] == null) {
@@ -186,23 +218,51 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
         book.cover = data['imageLinks']['thumbnail'];
       }
       print('Book ${book.title} ---- ${book.cover}----');
-      Navigator.of(context)
-          .pushNamed('/book', arguments: {'book': book});
+      Navigator.of(context).pushNamed('/book', arguments: {'book': book});
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
   }
 
+  /// https://stackoverflow.com/questions/57340534/bottom-navbar-rounded-corners
   Widget _bottonNavigation() {
-    return BottomNavigationBar(
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.house_rounded), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Profile"),
-      ],
-      currentIndex: _selectedIndex,
-      selectedItemColor: Theme.of(context).accentColor,
-      onTap: _onItemTapped,
-    );
+    return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.grey,
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+          child: BottomAppBar(
+            shape: CircularNotchedRectangle(),
+            color: Colors.white.withAlpha(0),
+            elevation: 0,
+            child: BottomNavigationBar(
+              backgroundColor: Colors.white.withAlpha(255),
+              elevation: 10,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(TangaCustomIcons.menu_1), label: "Home"),
+                BottomNavigationBarItem(
+                    icon: Icon(TangaCustomIcons.user_1), label: "Profile"),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Theme.of(context).accentColor,
+              onTap: _onItemTapped,
+            ),
+          ),
+        ));
   }
 
   void _onItemTapped(int index) {

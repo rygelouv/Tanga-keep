@@ -9,6 +9,7 @@ import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
+import 'package:keep/tanga_custom_icons_icons.dart';
 import 'package:keep/widget/bottom_navigation.dart';
 import 'package:keep/widget/drawer.dart';
 import 'package:keep/widget/notes_grid.dart';
@@ -101,6 +102,10 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
   Widget _appBar(BuildContext context, NoteFilter filter, Widget bottom) =>
       SliverAppBar(
         floating: true,
+        leading: IconButton(
+          icon: Icon(TangaCustomIcons.left_arrow_2, color: kNewAccentColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         snap: true,
         title: Text(_book.title,
         style: TextStyle(
