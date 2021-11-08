@@ -110,7 +110,7 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         title: Text(_book.title,
         style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 25,
+            fontSize: 20,
           color: Theme.of(context).accentColor
         )
         ),

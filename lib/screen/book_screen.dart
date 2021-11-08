@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:keep/model/book.dart';
@@ -15,6 +16,7 @@ class BookScreen extends StatefulWidget {
 }
 
 class _BookScreenState extends State<BookScreen> {
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -34,8 +36,8 @@ class _BookScreenState extends State<BookScreen> {
   }
 
   Widget _appBar(BuildContext context) => SliverAppBar(
-    floating: true,
-    snap: true,
+    floating: false,
+    snap: false,
     toolbarHeight: 250,
     title: Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -61,7 +63,7 @@ class _BookScreenState extends State<BookScreen> {
         Padding(
           padding: EdgeInsets.only(left: 15),
           child: Text(
-            "Rygel",
+            user.displayName != null ? user.displayName.split(' ').first : "Welcome Back",
             style: TextStyle(
                 color: kNewAccentColor,
                 fontSize: 28
