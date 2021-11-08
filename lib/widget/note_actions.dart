@@ -11,11 +11,16 @@ import '../styles.dart';
 
 /// Provide actions for a single [Note], used in a [BottomSheet].
 class NoteActions extends StatelessWidget {
+
+  final String bookId;
+
+  const NoteActions({Key key, @required this.bookId}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final note = Provider.of<Note>(context);
     final state = note?.state;
     final id = note?.id;
+    final _bookId = bookId;
     final uid = Provider.of<CurrentUser>(context)?.data?.uid;
 
     final textStyle = TextStyle(
@@ -32,6 +37,7 @@ class NoteActions extends StatelessWidget {
           onTap: () => Navigator.pop(context, NoteStateUpdateCommand(
             id: id,
             uid: uid,
+            bookId: _bookId,
             from: state,
             to: NoteState.archived,
             dismiss: true,
@@ -43,6 +49,7 @@ class NoteActions extends StatelessWidget {
           onTap: () => Navigator.pop(context, NoteStateUpdateCommand(
             id: id,
             uid: uid,
+            bookId: _bookId,
             from: state,
             to: NoteState.unspecified,
           )),
@@ -53,6 +60,7 @@ class NoteActions extends StatelessWidget {
           onTap: () => Navigator.pop(context, NoteStateUpdateCommand(
             id: id,
             uid: uid,
+            bookId: _bookId,
             from: state,
             to: NoteState.deleted,
             dismiss: true,

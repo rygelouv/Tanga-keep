@@ -10,6 +10,7 @@ class Book extends ChangeNotifier {
   final String id;
   String title;
   String cover;
+  BookState state;
   final DateTime createdAt;
   DateTime modifiedAt;
 
@@ -17,6 +18,7 @@ class Book extends ChangeNotifier {
     this.id,
     this.title,
     this.cover,
+    this.state,
     DateTime createdAt,
     DateTime modifiedAt
   }) : this.createdAt = createdAt ?? DateTime.now(),
@@ -28,6 +30,7 @@ class Book extends ChangeNotifier {
   Map<String, dynamic> toJson() => {
     'title': title,
     'cover': cover,
+    'state': state,
     'createdAt': (createdAt ?? DateTime.now()).millisecondsSinceEpoch,
     'modifiedAt': (modifiedAt ?? DateTime.now()).millisecondsSinceEpoch,
   };
@@ -37,7 +40,7 @@ class Book extends ChangeNotifier {
 
     await bookCollection
         .add(toJson())
-        .whenComplete(() => print("Notes item added to the database"));
+        .whenComplete(() => print("Book item added to the database"));
   }
 
   Future<void> updateBook(String uid) async {
@@ -46,7 +49,7 @@ class Book extends ChangeNotifier {
     await bookCollection
         .doc(id)
         .update(toJson())
-        .whenComplete(() => print("Note item updated in the database"))
+        .whenComplete(() => print("Book item updated in the database"))
         .catchError((e) => print(e));
   }
 }
@@ -63,7 +66,13 @@ Book toBook(DocumentSnapshot doc) {
   id: doc.id,
   title: data['title'],
   cover: data['cover'],
+  state: BookState.values[data['state'] ?? 0],
   createdAt: DateTime.fromMillisecondsSinceEpoch(data['createdAt'] ?? 0),
   modifiedAt: DateTime.fromMillisecondsSinceEpoch(data['modifiedAt'] ?? 0),
   );  else return null;
+}
+
+enum BookState {
+  active,
+  deleted
 }
