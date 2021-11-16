@@ -30,13 +30,13 @@ class BooksGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SliverPadding(
-    padding: const EdgeInsets.symmetric(horizontal: 10),
+    padding: const EdgeInsets.symmetric(horizontal: 25),
     sliver: SliverGrid(
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 200.0,
         mainAxisSpacing: 10.0,
         crossAxisSpacing: 10.0,
-        childAspectRatio: 1 / 1.2,
+        childAspectRatio: 1 / 1.53,
       ),
       delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) => _bookItem(context, books[index]),

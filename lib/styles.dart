@@ -28,6 +28,7 @@ const kNoteDetailTextColorLight = Color(0xC2000000);
 const kErrorColorLight = Color(0xFFD43131);
 const kWarnColorLight = Color(0xFFFD9726);
 const kBorderColorLight = Color(0xFFDADCE0);
+const kBorderColorLightGray = Color(0xFFF9F9F9);
 const kColorPickerBorderColor = Color(0x21000000);
 const kBottomAppBarColorLight = Color(0xF2FFFFFF);
 
@@ -48,7 +49,7 @@ const kAccentColorLight = MaterialColor(
   },
 );
 
-const kNewAccentColor = Color(0xFFFF2D55);
+const kNewAccentColor = Color(0xFF0F397D);
 
 /// Available note background colors
 const Iterable<Color> kNoteColors = [
