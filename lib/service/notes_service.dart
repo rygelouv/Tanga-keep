@@ -13,6 +13,7 @@ import '../styles.dart';
 abstract class NoteCommand {
   final String id;
   final String uid;
+  final String bookId;
 
   /// Whether this command should dismiss the current screen.
   final bool dismiss;
@@ -21,6 +22,7 @@ abstract class NoteCommand {
   const NoteCommand({
     @required this.id,
     @required this.uid,
+    @required this.bookId,
     this.dismiss = false,
   });
 
@@ -46,10 +48,11 @@ class NoteStateUpdateCommand extends NoteCommand {
   NoteStateUpdateCommand({
     @required String id,
     @required String uid,
+    @required String bookId,
     @required this.from,
     @required this.to,
     bool dismiss = false,
-  }) : super(id: id, uid: uid, dismiss: dismiss);
+  }) : super(id: id, uid: uid, bookId: bookId, dismiss: dismiss);
 
   @override
   String get message {
@@ -75,10 +78,10 @@ class NoteStateUpdateCommand extends NoteCommand {
   }
 
   @override
-  Future<void> execute() => updateNoteState(to, id, uid);
+  Future<void> execute() => updateNoteState(to, id, uid, bookId);
 
   @override
-  Future<void> revert() => updateNoteState(from, id, uid);
+  Future<void> revert() => updateNoteState(from, id, uid, bookId);
 }
 
 /// Mixin helps handle a [NoteCommand].
@@ -151,21 +154,21 @@ extension NoteStore on Note {
   }
 
   /// Update this note to the given [state].
-  Future<void> updateState(NoteState state, String uid) async => id == null
+  Future<void> updateState(NoteState state, String uid, String bookId) async => id == null
     ? updateWith(state: state) // new note
-    : updateNoteState(state, id, uid);
+    : updateNoteState(state, id, uid, bookId);
 }
 
 /// Returns reference to the notes collection of the user [uid].
 CollectionReference notesCollection(String uid) => FirebaseFirestore.instance.collection('notes-$uid');
 
 /// Returns reference to the given note [id] of the user [uid].
-DocumentReference noteDocument(String id, String uid) => notesCollection(uid).doc(id);
+DocumentReference noteDocument(String id, String uid, String bookId) => bookNotesCollection(bookId, uid).doc(id);
 
 /// Update a note to the [state], using information in the [command].
-Future<void> updateNoteState(NoteState state, String id, String uid) =>
-  updateNote({'state': state?.index ?? 0}, id, uid);
+Future<void> updateNoteState(NoteState state, String id, String uid, String bookId) =>
+  updateNote({'state': state?.index ?? 0}, id, uid, bookId);
 
 /// Update a note [id] of user [uid] with properties [data].
-Future<void> updateNote(Map<String, dynamic> data, String id, String uid) =>
-  noteDocument(id, uid).update(data);
+Future<void> updateNote(Map<String, dynamic> data, String id, String uid, String bookId) =>
+  noteDocument(id, uid, bookId).update(data);

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -141,10 +142,13 @@ class _HomeScreenState extends State<HomeScreen> with CommandHandler {
 
   /// Create notes query
   Stream<List<Book>> _createBookStream(BuildContext context) {
-    final user = Provider.of<CurrentUser>(context)?.data;
+    final user = FirebaseAuth.instance.currentUser;
     final collection = booksCollection(user?.uid);
 
     return collection
+        .where('state',
+        isLessThan: BookState.deleted
+            .index)
         .snapshots()
         .handleError((e) => debugPrint('query books failed: $e'))
         .map((snapshot) => Book.fromQuery(snapshot));

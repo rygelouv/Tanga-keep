@@ -222,7 +222,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                NoteActions(),
+                NoteActions(bookId: _bookId),
                 if (_note.state.canEdit) const SizedBox(height: 16),
                 if (_note.state.canEdit) LinearColorPicker(),
                 const SizedBox(height: 12),
@@ -244,9 +244,12 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
 
   /// Callback before the user leave the editor.
   Future<bool> _onPop(String bookId, String uid, bool isInstantLeave) {
+    debugPrint("Book Id in editor $_bookId");
+
     if (!isInstantLeave && _isDirty && (_note.id != null || _note.isNotEmpty)) {
       _note
         ..modifiedAt = DateTime.now()
+        ..state = NoteState.unspecified
         ..saveToFireStore(bookId, uid);
       Navigator.pushAndRemoveUntil(
         context,
@@ -261,7 +264,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
 
   void _watchNoteDocument(String uid) {
     if (_noteSubscription == null && uid != null && _note.id != null) {
-      _noteSubscription = noteDocument(_note.id, uid).snapshots()
+      _noteSubscription = noteDocument(_note.id, uid, _bookId).snapshots()
         .map((snapshot) => snapshot.exists ? snapshot.toNote() : null)
         .listen(_onCloudNoteUpdated);
     }
@@ -306,6 +309,7 @@ class _NoteEditorState extends State<NoteEditor> with CommandHandler {
     processNoteCommand(_scaffoldKey.currentState, NoteStateUpdateCommand(
       id: _note.id,
       uid: uid,
+      bookId: _bookId,
       from: _note.state,
       to: state,
     ));

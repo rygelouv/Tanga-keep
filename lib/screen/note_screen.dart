@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:keep/model/camera_source.dart';
 import 'package:keep/model/filter.dart';
 import 'package:keep/model/note.dart';
 import 'package:keep/model/user.dart';
+import 'package:keep/screens.dart';
 import 'package:keep/service/books_service.dart';
 import 'package:keep/service/notes_service.dart';
 import 'package:keep/tanga_custom_icons_icons.dart';
@@ -116,6 +118,13 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
         ),
         titleSpacing: 0,
         elevation: 0,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.delete),
+            tooltip: 'Delete book',
+            onPressed: () => _deleteBook(),
+          ),
+        ],
       );
 
   Widget _topActions(BuildContext context) => Container(
@@ -200,6 +209,8 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
 
   void openCamera() async {
     debugPrint("opening Camera");
+    debugPrint("Book id ${_book.id} ");
+
     // Ensure that plugin services are initialized so that `availableCameras()`
     // can be called before `runApp()`
     WidgetsFlutterBinding.ensureInitialized();
@@ -303,28 +314,25 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
   /// Callback on a single note clicked
   void _onNoteTap(Note note) async {
     final command =
-    await Navigator.pushNamed(context, '/note_editor', arguments: {'note': note});
+    await Navigator.pushNamed(context, '/note_editor', arguments: {'note': note, 'bookId': _book.id});
     processNoteCommand(_scaffoldKey.currentState, command);
   }
 
   /// Create notes query
   Stream<List<Note>> _createNoteStream(
       BuildContext context, NoteFilter filter) {
-    final user = Provider.of<CurrentUser>(context)?.data;
+    final user = FirebaseAuth.instance.currentUser;
     final sinceSignUp = DateTime.now().millisecondsSinceEpoch -
         (user?.metadata?.creationTime?.millisecondsSinceEpoch ?? 0);
     final useIndexes = sinceSignUp >=
         _10_min_millis; // since creating indexes takes time, avoid using composite index until later
     final collection = bookNotesCollection(_book.id, user?.uid);
-    final query = filter.noteState == NoteState.unspecified
-        ? collection
+    final query =collection
         .where('state',
         isLessThan: NoteState.archived
-            .index) // show both normal/pinned notes when no filter specified
-        .orderBy('state', descending: true) // pinned notes come first
-        : collection.where('state', isEqualTo: filter.noteState.index);
+            .index);
 
-    return (useIndexes ? query.orderBy('createdAt', descending: true) : query)
+    return (query)
         .snapshots()
         .handleError((e) => debugPrint('query notes failed: $e'))
         .map((snapshot) => Note.fromQuery(snapshot));
@@ -340,6 +348,37 @@ class _NoteScreen extends State<NoteScreen> with CommandHandler {
     return indexUnpinned > -1
         ? Tuple2(notes.sublist(0, indexUnpinned), notes.sublist(indexUnpinned))
         : Tuple2(notes, []);
+  }
+
+  void _deleteBook() async {
+    final uid = FirebaseAuth.instance.currentUser.uid;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: const Text('Are you sure to delete this book ?'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('No'),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            child: const Text('Yes'),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (yes) {
+      await bookDocument(_book.id, uid).update({'state': BookState.deleted.index});
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => HomeScreen(),
+        ),
+            (route) => false,
+      );
+    }
   }
 }
 
